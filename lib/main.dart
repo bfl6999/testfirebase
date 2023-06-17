@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       scaffoldMessengerKey: Utils.messengerKey,
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Demo de Flutter',
+      title: 'TestApp Flutter CIESOL',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

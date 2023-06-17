@@ -388,32 +388,30 @@ class _FormaFormularioState extends State<FormaFormulario> {
 
     );
   }
-
+/// Función asíncrona con la que se envían los datos del usuario introducidos en el Formulario.
   Future createUser(Datos user) async {
-    // Referenciamos el documento del usuario
-    final docUser = FirebaseFirestore.instance /// Probar a quitar 2 lineas hasta el primer doc
+    /// Se crea el documento del usuario
+    final docUser = FirebaseFirestore.instance
         .collection('users')
-        .doc(nombreUser);// Cambiamos el nombre por horaRegistro para añadir otra collec
-    // Referencia a la colección del usuario del que iniciamos sesion
-    CollectionReference ref = FirebaseFirestore.instance /// Aqui quitamos las 2 primeras y referenciamos hasta la coleccion users
+        .doc(nombreUser);
+    /// Referencia a la colección del usuario del que se inicia sesion
+    CollectionReference ref = FirebaseFirestore.instance
         .collection('Users')
         .doc(nombreUser)
         .collection(nombreUser);
     try {
       // Try catch
       QuerySnapshot colec =
-      await ref.get(); // Capturamos la colección en el objeto colec
-      if (colec.docs.isEmpty) {
-        //if(colec.docs.length == 0){
+      await ref.get(); /// Se captura la colección en el objeto colec
+      if (colec.docs.isEmpty) { /// Si no hay ningún documento en la colección se usa el id del documento
         user.id = docUser.id;
+        /// Se crea el documento y se envía a la base de datos
         final json = user.toJson();
-        // Creamos el documento y lo escribimos en la base de datos
         await docUser.set(json);
       } else {
-        //añadir en misma coleccion con otro documento
+        /// Se añade el documento en la misma coleccion
         user.id = ref.id;
         final json = user.toJson();
-        // Creamos el documento y lo escribimos en la base de datos
         await docUser.update(json);
       }
     } catch (e) {

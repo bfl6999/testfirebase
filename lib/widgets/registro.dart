@@ -15,7 +15,6 @@ import 'package:flutter/cupertino.dart';
 import '../Utils.dart';
 import '../main.dart';
 import 'constants.dart';
-import 'formulario_formas.dart';
 
 class Registro extends StatefulWidget {
   final VoidCallback onClickedSignIn;
@@ -242,7 +241,7 @@ class _RegistroState extends State<Registro> {
                 ),
 
                 const Text(
-                  'Creating an account means you\'re okay with our Terms of Services and our Privacy Policy',
+                  'Crear una cuenta significa que está de acuerdo con nuestros términos de servicio y nuestra política de privacidad',
                   //style: kLoginTermsAndPrivacyStyle(size),
                   textAlign: TextAlign.center,
                 ),

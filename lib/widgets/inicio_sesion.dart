@@ -35,7 +35,7 @@ class _Inicio extends State<Inicio> {
 
   SimpleUIController simpleUIController = Get.put(SimpleUIController());
 
-  @override // Probar a poner el gestureDetector
+  @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     var theme = Theme.of(context);
@@ -45,7 +45,6 @@ class _Inicio extends State<Inicio> {
       child: Scaffold(
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
-          //key: formKey,
           body: LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth > 600) {
@@ -208,7 +207,7 @@ class _Inicio extends State<Inicio> {
                       height: size.height * 0.03,
                     ),
                     const Text(
-                      'Creating an account means you\'re okay with our Terms of Services and our Privacy Policy',
+                      'Todos los términos de servicio y nuestra política de privacidad se guian por la Universidad de Almeria',
                       //style: kLoginTermsAndPrivacyStyle(size),
                       textAlign: TextAlign.center,
                     ),

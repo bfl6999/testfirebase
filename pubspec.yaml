@@ -35,7 +35,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-    # Fire Base DataBase
+    # Firebase DataBase, Cloud Firestore
   cloud_firestore: ^4.2.0
   # Funciones firebase autenticación por correo/recuperación contraseña
   firebase_auth: ^4.2.4
@@ -43,15 +43,15 @@ dependencies:
   email_validator: ^2.1.17
   # Formatos creados
   mask_text_input_formatter: ^2.4.0
-  # Para el uso de páginas externas en la aplicación
-  # webview_flutter: ^4.2.0 -- Inuse
+  # Para el uso de páginas externas en la aplicación (Usado prototipo1 google forms)
+  # webview_flutter: ^4.2.0
   # Para cambiar el formato de la fecha actual
   intl: ^0.17.0
   # To add http requests
   http: ^0.13.5
   # Add pub get
   get: ^4.6.5
-  # Test lotie func
+  # Test lotie function
   lottie: ^2.3.1
   # To add packages of google fonts
   google_fonts: ^4.0.3

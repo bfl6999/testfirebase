@@ -52,11 +52,9 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
   final user = FirebaseAuth.instance.currentUser!;
   late String nombreUser;
   late String horaRegistro;
-
-  ///@override
-  ////void dipose(){
-  ///super.dispose();
-  /// }
+  DateTime? horaUltimoEnvio;
+  late int minutosRestantes;
+  DateTime? horaUltimoEnvioBdd;
 
   SimpleUIController simpleUIController = Get.put(SimpleUIController());
 
@@ -148,9 +146,6 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
   Widget _buildMainBody(
       Size size, SimpleUIController simpleUIController, ThemeData theme) {
     return ListView(
-      /// child: Column(
-      //crossAxisAlignment: CrossAxisAlignment.start,
-      //mainAxisAlignment: MainAxisAlignment.center,
       padding: const EdgeInsets.only(left: 10.0, right: 10.0),
       children: [
         Visibility(
@@ -160,10 +155,6 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
               semanticsLabel: nombreUser,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             )),
-
-        ///Padding(
-        ///padding: const EdgeInsets.only(left: 0.0, right: 5.0),
-        ///child: Column(children: [Padding(padding: (const EdgeInsets.only(left: 0.0, right: 0.0),child: Form()
 
         Visibility(
           visible: true,
@@ -207,9 +198,6 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
             ],
           ),
           child: Column(children: <Widget>[
-            /// Aqui probar a poner un Form y la misma key para los campos --> SIgnOutEvent
-            ///39 - 22 = 17
-
             Text(
               '1. ¿Se encuentra satisfecho con el ambiente térmico?',
               style: kFormQuestions(size),
@@ -397,9 +385,7 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
               children: [
                 Text(
                   '2. ¿Qué tipo de ropa diría lleva puesta ahora?      ',
-
-                  ///52
-                  style: kFormQuestions(size),
+                  style: kFormQuestions(size), ///52
                 ),
                 SizedBox(
                   height: size.height * 0.01,
@@ -455,8 +441,6 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
                                 ///child: Text('Ropa    '), ///17 comoda
                                 child: Text('Ropa manga larga'),
                               ),
-
-                              ///contentPadding: const EdgeInsets.all(0),
                               leading: Radio<Ropa>(
                                 value: Ropa.larga,
                                 groupValue: _ropa,
@@ -491,11 +475,7 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
                                 alignment: Alignment(-55,
                                     0), // Cambiar a todos los Textos por igual
                                 child: Text('Ropa abrigada'),
-
-                                ///13 - -55
                               ),
-
-                              ///contentPadding: const EdgeInsets.all(0),
                               leading: Radio<Ropa>(
                                 value: Ropa.abrigada,
                                 groupValue: _ropa,
@@ -527,26 +507,13 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
                 ),
               ]),
         ),
-        /*const Text('3. ¿Cuál es la actividad mas parecida que realiza?', ///textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal),), */
-
         SizedBox(
           height: size.height * 0.05,
         ),
 
-        /*const Padding(
-                padding: EdgeInsets.only(left: 15.0),
-                child: Text(
-                  '3. ¿Cuál es la actividad mas parecida que realiza?',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),*/
-
         Container(
           //height: MediaQuery.of(context).size.height*0.50,
           height: 550.0,
-          //alignment: Alignment.topLeft,
-          //width: MediaQuery.of(context).size.width*0.50,
           width: 300.0,
           padding: const EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0),
           decoration: BoxDecoration(
@@ -566,7 +533,6 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
             ],
           ),
           child: Column(
-              //mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '3. ¿Cuál es la actividad mas parecida que realiza?    ',
@@ -692,13 +658,10 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
         SizedBox(
           height: size.height * 0.03,
         ),
-        //botonmover(context),
         sendData(theme),
         SizedBox(
           height: size.height * 0.02,
         ),
-
-        ///closeSesion(theme),
         closeSesion(theme, onCloseSession: () {
           Navigator.pop(context);
         }),
@@ -729,10 +692,6 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
             'Cerrar Sesión',
             style: TextStyle(fontSize: 24),
           ),
-
-          /// onPressed: () => FirebaseAuth.instance.signOut(),
-          ///onPressed: () async {
-          ///FirebaseAuth.instance.signOut();
           onPressed: () {
             FirebaseAuth.instance.signOut();
             if (onCloseSession != null) {
@@ -753,90 +712,116 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
             style: TextStyle(fontSize: 24),
           ),
           onPressed: () async {
+
+            final collectionRef = FirebaseFirestore.instance
+                .collection('users')
+                .doc(nombreUser)
+                .collection(nombreUser);
+            final querySnapshot = await collectionRef.get();
+
+            if (querySnapshot.docs.isNotEmpty) {
+              final lastDocId = querySnapshot.docs.last.id;
+              final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+              horaUltimoEnvioBdd = dateFormat.parse(lastDocId);
+            }
             //Guardamos la hora en la que registramos los datos: HH hora formato..min..seg
             horaRegistro =
                 DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-            final user = Opiniones(
-              //opinion: int.parse(_ejemplo.value.toString()),
-              opinion: varAux,
+            const duracionMinima =  Duration(minutes: 30);
+            final horaActual = DateTime.now();
 
-              ///opinion: _ejemplo!.value, --- Quizas probar mas adelante -> Nos ahorramos ifs
-              ropa: convertToClothe(_ropa.toString()),
-              actividad: convertToIntActivity(_actividad.toString()),
-            );
-
-            ///bool success = await createUser(user); /// bool await...
-
-            showDialog(
-              context: context,
-              builder: (context) {
-                // Create a FutureBuilder to handle the createUser() operation
-                return FutureBuilder<bool>(
-                  future: createUser(user),
-                  builder: (context, snapshot) {
-                    // Check the current state of the future
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      // While waiting for the future to complete, show a progress indicator
-                      return const AlertDialog(
-                        title: Text('Enviando respuesta'),
-                        content: Center(
-                          heightFactor: 2.0,
-                          ///widthFactor: 5.0,
-                          child: CircularProgressIndicator(
-                          backgroundColor: Colors.blueGrey,
-                        ),
-                      ),);
-                    } else if (snapshot.hasError) {
-                      // If an error occurred, show an error dialog
-                      return AlertDialog(
-                        title: const Text('Error'),
-                        content: const Text('Hubo un error al enviar la opinión'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Aceptar'),
-                          ),
-                        ],
-                      );
-                    } else {
-                      // The future completed successfully
-                      final success = snapshot.data;
-                      return AlertDialog(
-                        title: Text(success! ? '¡Enviado!' : 'Error'),
-                        content: Text(success
-                            ? 'La opinión se envió correctamente'
-                            : 'Hubo un error al enviar la opinión'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Aceptar'),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                );
-              },
-            );
-
+            if(horaUltimoEnvioBdd == null  || (horaActual.difference(horaUltimoEnvioBdd!)>= duracionMinima)){
+              /// Se permite el envío de datos
+              final user = Opiniones(
+                //opinion: int.parse(_ejemplo.value.toString()),
+                opinion: varAux,
+                ropa: convertToClothe(_ropa.toString()),
+                actividad: convertToIntActivity(_actividad.toString()),
+              );
+              showDialog(
+                context: context,
+                builder: (context) {
+                  // Create a FutureBuilder to handle the createUser() operation
+                  return FutureBuilder<bool>(
+                    future: createUser(user),
+                    builder: (context, snapshot) {
+                      // Check the current state of the future
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // While waiting for the future to complete, show a progress indicator
+                        return const AlertDialog(
+                          title: Text('Enviando respuesta'),
+                          content: Center(
+                            heightFactor: 2.0,
+                            ///widthFactor: 5.0,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.blueGrey,
+                            ),
+                          ),);
+                      } else if (snapshot.hasError) {
+                        // If an error occurred, show an error dialog
+                        return AlertDialog(
+                          title: const Text('Error'),
+                          content: const Text('Hubo un error al enviar la opinión'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Aceptar'),
+                            ),
+                          ],
+                        );
+                      } else {
+                        // The future completed successfully
+                        final success = snapshot.data;
+                        return AlertDialog(
+                          title: Text(success! ? '¡Enviado!' : 'Error'),
+                          content: Text(success
+                              ? 'La opinión se envió correctamente'
+                              : 'Hubo un error al enviar la opinión'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Aceptar'),
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  );
+                },
+              );
+            }else{
+              ///int minutosRestantes = 30 - horaUltimoEnvio!.minute; $minutosRestantes
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Límite de respuesta alcanzado'),
+                  content: const Text('Debes esperar 30 minutos, hasta poder envíar una nueva respuesta'),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Aceptar'))
+                  ],
+                ),
+              );
+            }
             /// Pop up ---- Respuesta enviada ---
           }),
     );
+
   }
 
-  /*
-  Comprobamos si el usuario no esta creado ya en la coleccion Usuarios. Si ya está registrado, añadimos el registro a un nuevo Documento.
-  Si no está registrado creamos una nueva Colección con el nombre del correo
-   */
+
+  ///Comprobamos si el usuario no esta creado ya en la coleccion Usuarios. Si ya está registrado, añadimos el registro a un nuevo Documento.
+  ///Si no está registrado creamos una nueva Colección con el nombre del correo
+
   Future<bool> createUser(Opiniones user) async {
-    /// Cambios con el bool
-    // Referenciamos el documento del usuario
+    /// Documento del usuario que se crea, con la hora actual como id
     final docUser = FirebaseFirestore.instance
         .collection('users')
         .doc(nombreUser)
         .collection(nombreUser)
         .doc(horaRegistro);
-    // Referencia a la colección del usuario del que iniciamos sesion
+    /// Se referencia a la colección del usuario del que se ha iniciacido sesion
     CollectionReference ref = FirebaseFirestore.instance
         .collection('Users')
         .doc(nombreUser)
@@ -844,28 +829,24 @@ class _FormularioGoogleState extends State<FormularioGoogle> {
     try {
       // Try catch
       QuerySnapshot colec =
-          await ref.get(); // Capturamos la colección en el objeto colec
+          await ref.get(); /// Se captura la colección en la query colec
       if (colec.docs.isEmpty) {
-        //if(colec.docs.length == 0){
         user.id = docUser.id;
+        /// Se crea el documento y se envia a la base de datos
         final json = user.toJson();
-        // Creamos el documento y lo escribimos en la base de datos
         await docUser.set(json);
       } else {
-        //añadir en misma coleccion con otro documento
+        /// Se añade en la misma coleccion con otro documento
         user.id = ref.id;
         final json = user.toJson();
-        // Creamos el documento y lo escribimos en la base de datos
+        /// Creamos el documento y lo escribimos en la base de datos
         await docUser.update(json);
       }
       return true;
-
       /// bool
     } catch (e) {
       return false;
-
-      ///bool
-      ///const Text('Algo salio mal');
     }
   }
+
 }
